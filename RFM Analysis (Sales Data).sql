@@ -1,9 +1,21 @@
+/*
+RFM Analysis | Value Segmentation | Customer Segmentation
+
+Skills used: Joins, Unions, CTE's, Temp Tables,Views, Windows Functions, Aggregate Functions, CASE, Converting Data Types
+
+--==> This means insights/inferences
+*/
 
 --Lets have a look at the data
 Select top 10 * FROM PortfolioProjects..['Sales Orders Data'] 
 
 --Get the range of dates for the order data
-Select MAX(OrderDate), MIN(OrderDate) FROM PortfolioProjects..['Sales Orders Data'] 
+Select 
+	MAX(OrderDate) AS MAX, 
+	MIN(OrderDate) AS MIN  
+FROM PortfolioProjects..['Sales Orders Data'] 
+
+--==> Data is from May 2018 to Dec 2020
 
 --Since its a bit out-dated data, so lets declare a today variable for better calculations
 DECLARE @today_date AS DATE = '2021-01-31';
@@ -17,8 +29,9 @@ SELECT
 FROM PortfolioProjects..['Sales Orders Data'] 
 GROUP BY _CustomerID
 
--------------------------------------------------------------------------
----Lets understand the distribution of RFM Values
+---------------------------------------------------------------------------------------------------------------------------------
+---Lets understand the distribution of RFM Values by Five Number Summary
+
 --Calculate RFM Values
 DECLARE @today_date AS DATE = '2021-01-01';
 WITH RFM_CALC AS (
@@ -30,6 +43,7 @@ WITH RFM_CALC AS (
 	FROM PortfolioProjects..['Sales Orders Data'] 
 	GROUP BY _CustomerID
 ),
+--Minimum & Maximum Values
 MinMax AS ( 
 	Select 
 		Min(Recency) AS Rmin,
@@ -40,6 +54,7 @@ MinMax AS (
 		Max(Monetary_Value) AS Mmax
 	FROM RFM_CALC 
 )
+--Fivenumber Summary for Monetary Value
 SELECT DISTINCT
 	'Monetary Value' AS RFM,
 	M.Mmin AS Min,
@@ -49,6 +64,7 @@ SELECT DISTINCT
 	M.Mmax AS Max
 FROM MinMax M JOIN RFM_CALC ON 1=1
 UNION
+--Fivenumber Summary for Frequency
 SELECT DISTINCT
 	'Frequency' AS RFM,
 	F.Fmin AS Min,
@@ -58,6 +74,7 @@ SELECT DISTINCT
 	F.Fmax AS Max
 FROM MinMax F JOIN RFM_CALC ON 1=1
 UNION
+--Fivenumber Summary for Recency
 SELECT DISTINCT
 	'Recency' AS RFM,
 	R.Rmin AS Min,
@@ -67,8 +84,11 @@ SELECT DISTINCT
 	R.Rmax AS MAX
 FROM MinMax R JOIN RFM_CALC ON 1=1
 
------------------------------------------------------------------------------
-----lets partition RFM on the scale of 1 to 5 scores as the ranges of RFM are not very big
+--==> Data is righly-skewed
+
+---------------------------------------------------------------------------------------------------------------------------------
+----lets partition RFM Values on the scale of 1 to 5 scores as the ranges of RFM are not very big
+
 --Lets calculate RFM Values
 DECLARE @today_date AS DATE = '2021-01-01';
 WITH RFM_CALC AS (
@@ -94,8 +114,9 @@ FROM
 ORDER BY 
 	CustomerID
 
--------------------------------------------------------------------------------
-----Lets the above result as a temporary table for further analytics
+---------------------------------------------------------------------------------------------------------------------------------
+----Lets store the above result as a temporary table for further analytics
+
 --Lets calculate RFM Values
 WITH RFM_CALC AS (
 	SELECT 
@@ -119,10 +140,9 @@ INTO #RFM_Value_Score
 FROM 
 	RFM_CALC
 
-SELECT * FROM #RFM_Value_Score ORDER BY CustomerID
+---------------------------------------------------------------------------------------------------------------------------------
+----Lets check the Ranges of RFM by Scores using the temp table created above
 
------------------------------------------------------------------------------ 
-----Lets check the Ranges of RFM by Scores using the temp table we created
 WITH Recency_Range AS ( 
 	Select 
 		row_number() Over(Order by Recency_Score) AS I,
@@ -159,13 +179,10 @@ Join Frequency_Range F
 On R.I = F.I
 Join Monetary_Range M
 On R.I = M.I
--------------------------------------------------------------------------
----->Create the Customer Segmentation based on RFM Scores
+---------------------------------------------------------------------------------------------------------------------------------
+----Create the Value Segments & Customer Segments based on RFM Score & Average RFM Score & store as a View for further Analytics & Visualization
 
-----Lets create a view to store the RMF Values, RFM Score & Average RFM Score
-
---As we can't use the variable directly in the View, Lets create a Function
-
+--As we can't use the variable directly in the View, Lets create a Function to get the Recency``1
 CREATE FUNCTION GetRecency(@today_date DATE, @orderDate DATE)
 RETURNS INT
 AS
@@ -173,9 +190,10 @@ BEGIN
     RETURN DATEDIFF(day, @orderDate, @today_date);
 END;
 
+--Create a View for RFM Values & RFM Scores
 DROP VIEW IF EXISTS RFM_View;
 CREATE VIEW RFM_View AS
---Calculate RFm Values
+--Calculate RFM Values
 WITH RFM_CALC AS (
     SELECT 
         _CustomerID AS CustomerID,
@@ -205,7 +223,6 @@ RFM_AVG_SCORE AS (
 		,CAST((CAST(Recency_Score AS Float) + Frequency_Score + Monetary_Score)/3 AS DECIMAL(16,2)) AS Avg_RFM_Score
 	FROM RFM_SCORES
 )	 
-
 Select 
 	T1.CustomerID
 	,Recency,Frequency,Monetary_Value
@@ -217,9 +234,7 @@ ON T1.CustomerID = T2.CustomerID
 
 SELECT * FROM RFM_View ORDER BY Avg_RFM_Score
 
-----Create the Customer Segments & Value Segments based on rmf scores using the RFM_View 
-----Storing the Customer Segmentation as a View for Visualizations & Analytics
-
+----Create a View for the Customer Segments & Value Segments using the View "RFM_View" 
 DROP VIEW IF EXISTS Customer_Segmentaion;
 
 CREATE VIEW Customer_Segmentaion AS
@@ -227,38 +242,55 @@ Select *
 	, CASE WHEN Avg_RFM_Score >= 4 THEN 'High Value'
 			WHEN Avg_RFM_Score >= 2.5 AND Avg_RFM_Score < 4 THEN 'Mid Value'
 			WHEN Avg_RFM_Score > 0 AND Avg_RFM_Score < 2.5 THEN 'Low Value'
-	END AS Value_Seg
+	END AS Value_Seg --Value Segment
 	, CASE WHEN Frequency_Score >= 4 and Recency_Score >= 4 and Monetary_Score >= 4 THEN 'VIP'
 			WHEN Frequency_Score >= 3 and Monetary_Score < 4 THEN 'Regular'
 			WHEN Recency_Score <= 3 and Recency_Score > 1 THEN 'Dormat'
 			WHEN Recency_Score = 1 THEN 'Churned'
 			WHEN Recency_Score >= 4 and Frequency_Score <= 4 THEN 'New Customer'
-	END AS Cust_Seg
+	END AS Cust_Seg --Customer Segment
 FROM RFM_View 
 
--------------------------------------------------------------------------
-SELECT COUNT(CustomerID) AS Count,Value_Seg
-FROM Customer_Segmentaion 
-GROUP BY Value_Seg
-ORDER BY Count
+---------------------------------------------------------------------------------------------------------------------------------
+--*******************************************************************************************************************************
+----Insights
 
-SELECT COUNT(CustomerID) AS Count,Cust_Seg
+--Distribution of Customers by Value Segment
+SELECT 
+	Value_Seg, 
+	COUNT(CustomerID) AS Customer_Count
+FROM Customer_Segmentaion 
+GROUP BY Value_Seg 
+ORDER BY Customer_Count
+
+--==> We have highest Mid Value Customers (42%) 
+
+--Distribution of Customers by Customer Segment
+SELECT 
+	Cust_Seg,
+	COUNT(CustomerID) AS Customer_Count
 FROM Customer_Segmentaion 
 GROUP BY Cust_Seg 
-ORDER BY Count
+ORDER BY Customer_Count
 
-SELECT COUNT(CustomerID) AS Count,Cust_Seg,Value_Seg
+--==>Company have highest Dormat Customers (34%), 20% Regular Customers, 18% New Custoers, 16% Churned Customers & Lowest VIP Customers (12%)
+
+--Distribution of customers across different RFM customer segments within each value segment
+SELECT 
+	Value_Seg,
+	Cust_Seg,
+	COUNT(CustomerID) AS Customer_Count
 FROM Customer_Segmentaion 
 GROUP BY Cust_Seg,Value_Seg
-ORDER BY Value_Seg,Count DESC
+ORDER BY Value_Seg,Customer_Count DESC
 
---Avg RFM by Segments
-WITH Total_Cust AS 
-(Select COUNT(CustomerID) AS total FROM Customer_Segmentaion)
-SELECT Cust_Seg,(COUNT(CustomerID)*100.0/Total_Cust.total) As Volume, AVG(Recency) As R, AVG(Frequency) AS F,AVG(Monetary_Value) AS M
-FROM Customer_Segmentaion CROSS JOIN Total_Cust 
-GROUP BY Cust_Seg,Total_Cust.total 
-ORDER BY Cust_Seg
+--==>Churned Customers are equally distributed among mid value & low value customers.
+--==>Domart Customes are distributed across all the value segments, low value segment have the maximum dormat customers.
+--==>Regular Customers are also distributed across all the value segments but majorly the Mid Value segment.
+--==>New Customers are als distrubted across all the value segments but majorly low value & mid value segment.
+--==>55% of High Value segment customers are the VIP Customer
+
+ 
 
 
 
