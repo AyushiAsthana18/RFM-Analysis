@@ -190,8 +190,9 @@ BEGIN
     RETURN DATEDIFF(day, @orderDate, @today_date);
 END;
 
---Create a View for RFM Values & RFM Scores
+--Drop View if exixts
 DROP VIEW IF EXISTS RFM_View;
+--Create a View for RFM Values & RFM Scores
 CREATE VIEW RFM_View AS
 --Calculate RFM Values
 WITH RFM_CALC AS (
@@ -232,11 +233,12 @@ FROM RFM_SCORES T1
 JOIN RFM_AVG_SCORE T2
 ON T1.CustomerID = T2.CustomerID
 
-SELECT * FROM RFM_View ORDER BY Avg_RFM_Score
+SELECT TOP 10 * FROM RFM_View ORDER BY Avg_RFM_Score
 
-----Create a View for the Customer Segments & Value Segments using the View "RFM_View" 
+--Drop View if already exists
 DROP VIEW IF EXISTS Customer_Segmentaion;
 
+----Create a View for the Customer Segments & Value Segments using the View "RFM_View" 
 CREATE VIEW Customer_Segmentaion AS
 Select *
 	, CASE WHEN Avg_RFM_Score >= 4 THEN 'High Value'
@@ -251,6 +253,7 @@ Select *
 	END AS Cust_Seg --Customer Segment
 FROM RFM_View 
 
+SELECT TOP 10 * FROM Customer_Segmentaion ORDER BY Avg_RFM_Score
 ---------------------------------------------------------------------------------------------------------------------------------
 --*******************************************************************************************************************************
 ----Insights
@@ -285,9 +288,9 @@ GROUP BY Cust_Seg,Value_Seg
 ORDER BY Value_Seg,Customer_Count DESC
 
 --==>Churned Customers are equally distributed among mid value & low value customers.
---==>Domart Customes are distributed across all the value segments, low value segment have the maximum dormat customers.
+--==>Dormant Customes are distributed across all the value segments, low value segment have the maximum Dormant customers.
 --==>Regular Customers are also distributed across all the value segments but majorly the Mid Value segment.
---==>New Customers are als distrubted across all the value segments but majorly low value & mid value segment.
+--==>New Customers are als0 distributed across all the value segments but majorly low value & mid value segment.
 --==>55% of High Value segment customers are the VIP Customer
 
  
