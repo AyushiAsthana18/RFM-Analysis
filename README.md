@@ -1,5 +1,5 @@
 # RFM-Analysis
-#### Sales #### Marketing #### Retail #### E-Commerce #### Wholesale 
+#### Sales | Marketing | Retail | E-Commerce
 RFM Analysis is used to understand and segment customers based on their buying behaviour. RFM stands for recency, frequency, and monetary value, which are three key metrics that provide information about customer engagement, loyalty, and value to a business.
 
 Using RFM Analysis, a business can assess customer's:
