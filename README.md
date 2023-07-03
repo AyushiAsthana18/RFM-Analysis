@@ -11,11 +11,16 @@ To perform RFM analysis, we need a dataset that includes customer IDs, purchase 
 
 Dataset : https://data.world/dataman-udit/us-regional-sales-data
 
-When segmenting e-commerce customers based on RFM (Recency, Frequency, Monetary), we  can create customer segments that reflect their purchasing behavior. Here are five segment names we can consider:
+We cab divide Customers into 3 Value segments based on average RFM Score as follows:
+* High-Value (Top 20%)
+* Mid-Value (Next 30%)
+* Low-Value (Next 50%)
+  
+When segmenting customers based on RFM (Recency, Frequency, Monetary), we  can create customer segments that reflect their purchasing behavior. Here are five segment names we can consider:
 1. VIP Customers: This segment represents the high-value customers who have made recent and frequent purchases with a high monetary value. They are the most valuable and loyal customers.
 2. Regular Customers: This segment includes customers who make frequent purchases but may not have the highest monetary value. They are reliable and contribute to consistent sales.
 3. Dormant Customers: This segment consists of customers who haven't made a purchase in a while, despite having a history of previous purchases. These customers may require targeted marketing efforts to reactivate them.
 4. New Customers: This segment represents customers who have recently made their first purchase. They require nurturing and engagement to encourage repeat purchases and long-term loyalty.
 5. Churned Customers: This segment comprises customers who were once active but haven't made a purchase in a long time. They require re-engagement strategies to win them back and prevent them from churning.
 
-These segment names can be used as labels or identifiers to categorize customers based on their RFM attributes and enable targeted marketing and personalized strategies for each segment.
+These segment names are used as labels or identifiers to categorize customers based on their RFM attributes. This enables targeted marketing and personalized strategies for each segment. 
