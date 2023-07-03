@@ -1,7 +1,6 @@
 # RFM-Analysis
 #### Sales | Marketing | Retail | E-Commerce
-RFM Analysis is used to understand and segment customers based on their buying behaviour. RFM stands for recency, frequency, and monetary value, which are three key metrics that provide information about customer engagement, loyalty, and value to a business.
-
+RFM Analysis is used to understand and segment customers based on their buying behaviour. RFM stands for recency, frequency, and monetary value, which are three key metrics that provide information about customer engagement, loyalty, and value to a business. This understanding can help building the marketing strategies for specefic segments. 
 Using RFM Analysis, a business can assess customer's:
 * recency (the date they made their last purchase)
 * frequency (how often they make purchases)
@@ -11,10 +10,12 @@ To perform RFM analysis, we need a dataset that includes customer IDs, purchase 
 
 Dataset : https://data.world/dataman-udit/us-regional-sales-data
 
+
 We cab divide Customers into 3 Value segments based on average RFM Score as follows:
 * High-Value (Top 20%)
 * Mid-Value (Next 30%)
 * Low-Value (Next 50%)
+
   
 When segmenting customers based on RFM (Recency, Frequency, Monetary), we  can create customer segments that reflect their purchasing behavior. Here are five segment names we can consider:
 1. VIP Customers: This segment represents the high-value customers who have made recent and frequent purchases with a high monetary value. They are the most valuable and loyal customers.
@@ -24,3 +25,8 @@ When segmenting customers based on RFM (Recency, Frequency, Monetary), we  can c
 5. Churned Customers: This segment comprises customers who were once active but haven't made a purchase in a long time. They require re-engagement strategies to win them back and prevent them from churning.
 
 These segment names are used as labels or identifiers to categorize customers based on their RFM attributes. This enables targeted marketing and personalized strategies for each segment. 
+
+#### References :
+https://statso.io/rfm-analysis-case-study/
+https://thecleverprogrammer.com/2023/06/12/rfm-analysis-using-python/
+
